@@ -32,7 +32,15 @@ export interface DbShape {
   }>;
   notices: Array<{ id: string; title: string; body: string; date: string; audience: string }>;
   events: Array<{ id: string; title: string; date: string; location: string; description: string }>;
-  gallery: Array<{ id: string; caption: string; category: string }>;
+  gallery: Array<{
+    id: string;
+    caption: string;
+    category: string;
+    src?: string;
+    batchDate?: string;
+    location?: string;
+    tag?: string;
+  }>;
   testimonials: Array<{ id: string; name: string; program: string; quote: string; year: string }>;
   management: Array<{ id: string; name: string; role: string; bio: string; image?: string }>;
   donors: Array<{ id: string; name: string; amount: number; date: string; frequency?: string }>;
@@ -154,6 +162,27 @@ export const db = {
     const data = readDb();
     const record = { id: newId("n"), date: new Date().toISOString().slice(0, 10), ...input };
     data.notices.unshift(record);
+    writeDb(data);
+    return record;
+  },
+
+  addGalleryItem(input: {
+    caption: string;
+    category: string;
+    src: string;
+    location?: string;
+    batchDate?: string;
+    tag?: string;
+  }) {
+    const data = readDb();
+    const record = {
+      id: newId("gallery"),
+      location: input.location || "RDA Training Ground, Betul",
+      batchDate: input.batchDate || `UPLOAD // ${new Date().getFullYear()}`,
+      tag: input.tag || input.category.toUpperCase(),
+      ...input,
+    };
+    data.gallery.unshift(record);
     writeDb(data);
     return record;
   },

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import UploadPhotoModal from "@/components/UploadPhotoModal";
 
 interface GalleryItem {
   id: string;
@@ -66,6 +67,22 @@ const GALLERY_ITEMS: GalleryItem[] = [
 
 export default function GallerySection() {
   const [activeItem, setActiveItem] = useState<GalleryItem | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadedPhotos, setUploadedPhotos] = useState<GalleryItem[]>([]);
+
+  // Fetch newly uploaded photos from API
+  useEffect(() => {
+    fetch("/api/gallery")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.items && Array.isArray(data.items)) {
+          setUploadedPhotos(data.items);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const allItems = [...uploadedPhotos, ...GALLERY_ITEMS];
 
   return (
     <section id="gallery" className="py-20 bg-transparent border-b-2 border-[#163B66]/15 scroll-mt-24">
@@ -83,9 +100,9 @@ export default function GallerySection() {
           </p>
         </div>
 
-        {/* Gallery Grid - All 6 Photos */}
+        {/* Gallery Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {GALLERY_ITEMS.map((item) => (
+          {allItems.map((item) => (
             <div
               key={item.id}
               onClick={() => setActiveItem(item)}
@@ -98,6 +115,7 @@ export default function GallerySection() {
                   alt={item.caption}
                   fill
                   className="object-cover object-center filter contrast-105"
+                  unoptimized={item.src.startsWith("/uploads/") || item.src.startsWith("http")}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#071526]/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
               </div>
@@ -106,7 +124,7 @@ export default function GallerySection() {
               <div className="p-5 bg-white flex-1 flex flex-col justify-between">
                 <div>
                   <div className="text-[10px] font-mono text-[#D97706] font-bold mb-1.5 flex items-center justify-between">
-                    <span>{item.batchDate}</span>
+                    <span>{item.batchDate || "GROUND DRILL"}</span>
                     <span className="text-[#10B981] text-[9px] font-bold uppercase bg-[#10B981]/15 px-2 py-0.5 rounded-full">GROUND PHOTO</span>
                   </div>
                   <h3 className="text-sm font-bold uppercase font-mono text-[#0F172A] group-hover:text-[#163B66] transition-colors leading-snug">
@@ -114,7 +132,7 @@ export default function GallerySection() {
                   </h3>
                 </div>
                 <div className="flex items-center justify-between mt-4 text-[11px] font-mono text-[#64748B] pt-3 border-t border-gray-100">
-                  <span>📍 {item.location}</span>
+                  <span>📍 {item.location || "Betul Ground"}</span>
                   <span className="text-[#D97706] font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
                     <span>[ PREVIEW ]</span>
                     <span>→</span>
@@ -125,15 +143,29 @@ export default function GallerySection() {
           ))}
         </div>
 
-        {/* View Full Archive Button */}
+        {/* View Full Archive & Upload Photo Buttons */}
         <div className="mt-12 text-center flex flex-col items-center justify-center">
-          <Link
-            href="/gallery"
-            className="inline-flex items-center gap-3 px-8 py-4 bg-[#163B66] text-white font-mono text-xs font-bold tracking-widest uppercase hover:bg-[#0D223A] transition-all rounded-xl shadow-lg border-b-4 border-[#D97706] group card-hover-3d"
-          >
-            <span>EXPLORE FULL NGO PHOTO ARCHIVE</span>
-            <span className="text-[#FF9933] group-hover:translate-x-1.5 transition-transform">→</span>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
+            <Link
+              href="/gallery"
+              className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#163B66] text-white font-mono text-xs font-bold tracking-widest uppercase hover:bg-[#0D223A] transition-all rounded-xl shadow-lg border-b-4 border-[#D97706] group card-hover-3d w-full sm:w-auto"
+            >
+              <span>EXPLORE FULL NGO PHOTO ARCHIVE</span>
+              <span className="text-[#FF9933] group-hover:translate-x-1.5 transition-transform">→</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setIsUploadModalOpen(true)}
+              className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-[#D97706] to-[#B45309] text-white font-mono text-xs font-bold tracking-widest uppercase hover:from-[#B45309] hover:to-[#92400E] transition-all rounded-xl shadow-lg border-b-4 border-[#10B981] group card-hover-3d cursor-pointer w-full sm:w-auto"
+            >
+              <span>📸 UPLOAD PHOTO</span>
+              <span className="text-[#10B981] text-[10px] bg-black/35 px-2 py-0.5 rounded-full font-mono font-bold">
+                [OFFICIAL DESK]
+              </span>
+            </button>
+          </div>
+
           <p className="text-[11px] font-mono text-[#64748B] mt-2.5 uppercase font-semibold">
             • View all ground drill photos, tree plantation drives & trophy award presentations
           </p>
@@ -166,6 +198,7 @@ export default function GallerySection() {
                 alt={activeItem.caption}
                 fill
                 className="object-contain object-center"
+                unoptimized={activeItem.src.startsWith("/uploads/") || activeItem.src.startsWith("http")}
               />
             </div>
 
@@ -191,6 +224,15 @@ export default function GallerySection() {
           </div>
         </div>
       )}
+
+      {/* Upload Photo Modal */}
+      <UploadPhotoModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onPhotoUploaded={(newPhoto) => {
+          setUploadedPhotos((prev) => [newPhoto, ...prev]);
+        }}
+      />
     </section>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import UploadPhotoModal from "@/components/UploadPhotoModal";
 
 interface ArchivePhoto {
   id: string;
@@ -127,13 +128,29 @@ const ALL_PHOTOS: ArchivePhoto[] = [
 
 export default function GalleryArchivePage() {
   const [activeItem, setActiveItem] = useState<ArchivePhoto | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadedPhotos, setUploadedPhotos] = useState<ArchivePhoto[]>([]);
+
+  // Fetch newly uploaded photos from API
+  useEffect(() => {
+    fetch("/api/gallery")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.items && Array.isArray(data.items)) {
+          setUploadedPhotos(data.items);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const allPhotos = [...uploadedPhotos, ...ALL_PHOTOS];
 
   return (
     <main className="min-h-screen bg-[#F4F6F9] text-[#0F172A] selection:bg-[#D97706] selection:text-white pt-28 pb-24">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         
-        {/* Navigation Breadcrumb */}
-        <div className="mb-6">
+        {/* Navigation Breadcrumb & Upload Button Bar */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <Link
             href="/"
             className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white hover:bg-[#163B66] border border-slate-200 hover:border-[#163B66] shadow-sm hover:shadow-md text-[#1E293B] hover:text-white transition-all duration-300 text-xs font-bold tracking-wider uppercase hover:-translate-y-0.5"
@@ -145,6 +162,17 @@ export default function GalleryArchivePage() {
             </span>
             <span>Back to Home Page</span>
           </Link>
+
+          <button
+            type="button"
+            onClick={() => setIsUploadModalOpen(true)}
+            className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-[#D97706] to-[#B45309] hover:from-[#B45309] hover:to-[#92400E] text-white font-mono text-xs font-bold uppercase tracking-wider rounded-xl shadow-md border-b-2 border-[#10B981] transition-all cursor-pointer hover:scale-105"
+          >
+            <span>📸 UPLOAD PHOTO</span>
+            <span className="text-[#10B981] text-[10px] bg-black/35 px-2 py-0.5 rounded-full font-mono font-bold">
+              [OFFICIAL DESK]
+            </span>
+          </button>
         </div>
 
         {/* Hero Header */}
@@ -165,7 +193,7 @@ export default function GalleryArchivePage() {
             <div className="bg-[#0D223A] border border-[#205493] px-4 py-2 rounded-xl flex items-center gap-2">
               <span className="text-[#FF9933]">📸</span>
               <span className="text-gray-300">Total Ground Photos:</span>
-              <span className="text-white font-bold">{ALL_PHOTOS.length} Records</span>
+              <span className="text-white font-bold">{allPhotos.length} Records</span>
             </div>
             <div className="bg-[#0D223A] border border-[#205493] px-4 py-2 rounded-xl flex items-center gap-2">
               <span className="text-[#10B981]">✔</span>
@@ -177,7 +205,7 @@ export default function GalleryArchivePage() {
 
         {/* Photo Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ALL_PHOTOS.map((photo) => (
+          {allPhotos.map((photo) => (
             <div
               key={photo.id}
               onClick={() => setActiveItem(photo)}
@@ -190,6 +218,7 @@ export default function GalleryArchivePage() {
                   alt={photo.caption}
                   fill
                   className="object-cover object-center filter contrast-105"
+                  unoptimized={photo.src.startsWith("/uploads/") || photo.src.startsWith("http")}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#071526]/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
               </div>
@@ -243,6 +272,7 @@ export default function GalleryArchivePage() {
                 alt={activeItem.caption}
                 fill
                 className="object-contain object-center"
+                unoptimized={activeItem.src.startsWith("/uploads/") || activeItem.src.startsWith("http")}
               />
             </div>
 
@@ -268,6 +298,15 @@ export default function GalleryArchivePage() {
           </div>
         </div>
       )}
+
+      {/* Upload Photo Modal */}
+      <UploadPhotoModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onPhotoUploaded={(newPhoto) => {
+          setUploadedPhotos((prev) => [newPhoto, ...prev]);
+        }}
+      />
     </main>
   );
 }
