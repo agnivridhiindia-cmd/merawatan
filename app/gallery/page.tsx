@@ -166,12 +166,9 @@ export default function GalleryArchivePage() {
           <button
             type="button"
             onClick={() => setIsUploadModalOpen(true)}
-            className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-[#D97706] to-[#B45309] hover:from-[#B45309] hover:to-[#92400E] text-white font-mono text-xs font-bold uppercase tracking-wider rounded-xl shadow-md border-b-2 border-[#10B981] transition-all cursor-pointer hover:scale-105"
+            className="inline-flex items-center gap-2.5 px-6 py-2.5 bg-gradient-to-r from-[#D97706] to-[#B45309] hover:from-[#B45309] hover:to-[#92400E] text-white font-mono text-xs font-bold uppercase tracking-wider rounded-xl shadow-md border-b-2 border-[#10B981] transition-all cursor-pointer hover:scale-105"
           >
-            <span>📸 UPLOAD PHOTO</span>
-            <span className="text-[#10B981] text-[10px] bg-black/35 px-2 py-0.5 rounded-full font-mono font-bold">
-              [OFFICIAL DESK]
-            </span>
+            <span>UPLOAD PHOTO</span>
           </button>
         </div>
 

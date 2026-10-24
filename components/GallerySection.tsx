@@ -159,10 +159,7 @@ export default function GallerySection() {
               onClick={() => setIsUploadModalOpen(true)}
               className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-[#D97706] to-[#B45309] text-white font-mono text-xs font-bold tracking-widest uppercase hover:from-[#B45309] hover:to-[#92400E] transition-all rounded-xl shadow-lg border-b-4 border-[#10B981] group card-hover-3d cursor-pointer w-full sm:w-auto"
             >
-              <span>📸 UPLOAD PHOTO</span>
-              <span className="text-[#10B981] text-[10px] bg-black/35 px-2 py-0.5 rounded-full font-mono font-bold">
-                [OFFICIAL DESK]
-              </span>
+              <span>UPLOAD PHOTO</span>
             </button>
           </div>
 
