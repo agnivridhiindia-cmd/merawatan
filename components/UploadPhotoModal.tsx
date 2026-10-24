@@ -232,7 +232,8 @@ export default function UploadPhotoModal({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Raghuwanshiashok34@gmail.com"
+                    placeholder="Enter authorized administrator email"
+                    autoComplete="off"
                     className="w-full px-4 py-3 bg-[#071526] border border-[#1E3A5F] focus:border-[#D97706] rounded-xl text-white font-mono text-sm placeholder:text-gray-600 outline-none transition-colors"
                   />
                 </div>
